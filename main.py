@@ -69,7 +69,7 @@ def checksuccess(s, ign, log):
     
 
 
-modded("NotACreativeName")
+
 
 
 
