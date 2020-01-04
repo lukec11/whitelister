@@ -67,9 +67,3 @@ def checksuccess(s, ign, log):
         slackResponse(f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. {signature}')
         slackResponse(f"The latest line in the file was `{output}`.")
     
-
-
-
-
-
-
