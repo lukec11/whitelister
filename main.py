@@ -1,3 +1,7 @@
+#Luke Carapezza
+#Jan 04, 2019
+#TODO: Improve so that it will re-run and ensure success after recieving server warning.
+
 import slack
 import paramiko
 import json
@@ -74,7 +78,7 @@ def checksuccess(s, ign, log, ts, version):
     
     #checks to ensure that the player was whitelisted, and send response in slack
     if "to the whitelist" in output:
-        slackResponse(f"{ign} was added to the whitelist. {signature}", ts)
+        #slackResponse(f"{ign} was added to the whitelist. {signature}", ts)
         if version == 'modded':
             slackEmote('green', ts)
         elif version == 'vanilla':
