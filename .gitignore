@@ -1,6 +1,10 @@
 #config
 config.json
 
+#keys
+*rsa
+*.pub
+
 #VSCode
 .vscode/
 
