@@ -22,6 +22,7 @@ with open ("config.json") as f:
     slackToken = config["slackToken"]
     slackChannel = config["slackChannel"]
     slackChannelId = config["slackChannelId"]
+    triggerWord = config["triggerWord"]
 
 slack_client = slack.WebClient(token = slackToken)
 def slackResponse(message, ts):
@@ -55,10 +56,10 @@ def vanilla(ign, ts):
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     s.connect(hostname = hostVan, username = username, pkey = key)
-
+    
     #run command to whitelist
     s.exec_command(f"tmux send-keys -t 0 'whitelist add {ign}' Enter")
-
+    
     #call method to check whether or not the command worked properly
     checksuccess(s, ign, log2, ts, 'vanilla')
 
@@ -77,7 +78,7 @@ def checksuccess(s, ign, log, ts, version):
     output = stdout.read().decode("utf-8")
     
     #checks to ensure that the player was whitelisted, and send response in slack
-    if "to the whitelist" in output:
+    if "to the whitelist" or "is already whitelisted" in output:
         #slackResponse(f"{ign} was added to the whitelist. {signature}", ts)
         if version == 'modded':
             slackEmote('green', ts)
@@ -94,9 +95,9 @@ def message_on(**payload):
         data = payload['data']['text']
         web_client = payload['web_client']
 
-        if data.startswith('!whitelist'):
-            modded(data[11:len(data)], ts)
-            #vanilla(data, ts)
+        if data.startswith(triggerWord):
+            modded(data[len(triggerWord)+1:len(data)], ts)
+            vanilla(data[len(triggerWord)+1:len(data)], ts)
     except KeyError:
         print ("threaded message, ignore.")
 
