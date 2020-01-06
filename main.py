@@ -79,7 +79,6 @@ def checksuccess(s, ign, log, ts, version):
     
     #checks to ensure that the player was whitelisted, and send response in slack
     if "to the whitelist" or "is already whitelisted" in output:
-        #slackResponse(f"{ign} was added to the whitelist. {signature}", ts)
         if version == 'modded':
             slackEmote('green', ts)
         elif version == 'vanilla':
