@@ -81,7 +81,9 @@ def checksuccess(s, ign, log, ts, version):
     if "to the whitelist" or "is already whitelisted" in output:
         if version == 'modded':
             slackEmote('green', ts)
+            print(f"{ign} added to modded server.")
         elif version == 'vanilla':
+            print(f"{ign} added to vanila server.")
             slackEmote('white', ts)
     else:
         slackResponse(f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. {signature}', ts)
