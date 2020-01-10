@@ -7,6 +7,9 @@ import paramiko
 import json
 from datetime import datetime
 import time
+from airtable import Airtable
+import requests
+
 
 #get info from config
 with open ("config.json") as f:
@@ -24,6 +27,13 @@ with open ("config.json") as f:
     slackChannelId = config["slackChannelId"]
     triggerWord = config["triggerWord"]
 
+with open ("configStickers.json") as f:
+    config = json.load(f)
+
+    api_key1 = config['api_key']
+    base_key = config['base_key']
+    table_name = config['table_name']
+
 slack_client = slack.WebClient(token = slackToken)
 def slackResponse(message, ts):
     slack_client.chat_postMessage(token = slackToken, as_user=False, channel=slackChannel, text=message, thread_ts=ts)
@@ -33,6 +43,8 @@ def slackEmote(color, ts):
         slack_client.reactions_add(token=slackToken, channel=slackChannelId, name="heavy_check_mark", timestamp=ts)
     elif color == 'white':
         slack_client.reactions_add(token=slackToken, channel=slackChannelId, name="white_check_mark", timestamp=ts)
+    elif color == 'airtable':
+        slack_client.reactions_add(token = slackToken, channel = slackChannelId, name="airtable", timestamp=ts)
     else:
         print (f"Unknown color: color was reported as \"{color}\"")
 
@@ -68,7 +80,7 @@ def vanilla(ign, ts):
 
 def checksuccess(s, ign, log, ts, version):
     #signature
-    signature = "Sign Server MODDED."
+    signature = f"Sign Server {version}."
 
     #check for presence in log - was the command successful?
     command = (f"tail -1 {log}")
@@ -88,7 +100,23 @@ def checksuccess(s, ign, log, ts, version):
     else:
         slackResponse(f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. {signature}', ts)
         slackResponse(f"The latest line in the file was `{output}`.", ts)
+
+
+#stuff for airtable - stickers
+
+def airtable():
+    airtable = Airtable(base_key, table_name, api_key = api_key1 ) 
+    s = json.loads(json.dumps(airtable.get_all()))
+
+    return s
+
+def addToAirtable(ign, ts):
+    s = airtable()
+    s.insert({'IGN':ign})
+    slackEmote('airtable', ts)
+
     
+
 @slack.RTMClient.run_on(event="message")
 def message_on(**payload):
     ts = payload['data']['ts']
@@ -99,6 +127,7 @@ def message_on(**payload):
         if data.startswith(triggerWord):
             modded(data[len(triggerWord)+1:len(data)], ts)
             vanilla(data[len(triggerWord)+1:len(data)], ts)
+            addToAirtable(data[len(triggerWord)+1:len(data)], ts)
     except KeyError:
         print ("threaded message, ignore.")
 
