@@ -111,9 +111,10 @@ def airtable():
     return s
 
 def addToAirtable(ign, ts):
-    s = airtable()
+    '''s = airtable()
     s.insert({'IGN', ign})
-    slackEmote("airtable", ts)
+    slackEmote("airtable", ts)'''
+    pass
 
     
 
