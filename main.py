@@ -101,13 +101,6 @@ def checksuccess(s, ign, log, ts, version):
         slackResponse(f"The latest line in the file was `{output}`.", ts)
 
 
-#stuff for airtable - stickers
-
-def airtable():
-    airtable = Airtable(base_key, table_name, api_key = api_key1 ) 
-    s = json.loads(json.dumps(airtable.get_all()))
-
-    return s
 
     
 
@@ -121,7 +114,6 @@ def message_on(**payload):
         if data.startswith(triggerWord):
             modded(data[len(triggerWord)+1:len(data)], ts)
             vanilla(data[len(triggerWord)+1:len(data)], ts)
-            
     except KeyError:
         print ("threaded message, ignore.")
 
