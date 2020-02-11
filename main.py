@@ -7,7 +7,6 @@ import paramiko
 import json
 from datetime import datetime
 import time
-from airtable import Airtable
 import requests
 
 
@@ -110,12 +109,6 @@ def airtable():
 
     return s
 
-def addToAirtable(ign, ts):
-    '''s = airtable()
-    s.insert({'IGN', ign})
-    slackEmote("airtable", ts)'''
-    pass
-
     
 
 @slack.RTMClient.run_on(event="message")
@@ -128,7 +121,7 @@ def message_on(**payload):
         if data.startswith(triggerWord):
             modded(data[len(triggerWord)+1:len(data)], ts)
             vanilla(data[len(triggerWord)+1:len(data)], ts)
-            addToAirtable(data[len(triggerWord)+1:len(data)], ts)
+            
     except KeyError:
         print ("threaded message, ignore.")
 
