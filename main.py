@@ -101,9 +101,6 @@ def checksuccess(s, ign, log, ts, version):
         slackResponse(f"The latest line in the file was `{output}`.", ts)
 
 
-
-    
-
 @slack.RTMClient.run_on(event="message")
 def message_on(**payload):
     ts = payload['data']['ts']
