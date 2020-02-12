@@ -19,8 +19,8 @@ with open ("config.json") as f:
     username = config["username"] #username for ssh server
     key = paramiko.RSAKey.from_private_key_file(config["privkey"]) #generates paramiko key from an openssh privkey
     keypass = config["keypass"] #pass to privkey
-    log1 = config["log1"] #location of mc log files
-    log2 = config["log2"] 
+    log1 = config["log1"] #log file for the first server
+    log2 = config["log2"] #log file for the second server
     slackToken = config["slackToken"] #slack OAuth Bot User Token
     slackChannel = config["slackChannel"] #Slack channel (plaintext)
     slackChannelId = config["slackChannelId"] #Slack channel (CCXXXXXXXXX)
