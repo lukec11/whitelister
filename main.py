@@ -19,12 +19,12 @@ with open ("config.json") as f:
     username = config["username"] #username for ssh server
     key = paramiko.RSAKey.from_private_key_file(config["privkey"]) #generates paramiko key from an openssh privkey
     keypass = config["keypass"] #pass to privkey
-    log1 = config["log1"] #location of mc log files
-    log2 = config["log2"]
-    slackToken = config["slackToken"]
-    slackChannel = config["slackChannel"]
-    slackChannelId = config["slackChannelId"]
-    triggerWord = config["triggerWord"]
+    log1 = config["log1"] #log file for the first server
+    log2 = config["log2"] #log file for the second server
+    slackToken = config["slackToken"] #slack OAuth Bot User Token
+    slackChannel = config["slackChannel"] #Slack channel (plaintext)
+    slackChannelId = config["slackChannelId"] #Slack channel (CCXXXXXXXXX)
+    triggerWord = config["triggerWord"] #trigger word to activate the bot
 
 with open ("configStickers.json") as f:
     config = json.load(f)
