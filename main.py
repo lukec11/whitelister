@@ -105,10 +105,11 @@ def checksuccess(s, ign, log, ts, version):
 def message_on(**payload):
     ts = payload['data']['ts']
     try:
-        data = payload['data']['text']
+        data = payload['data']['text']  
         web_client = payload['web_client']
+        channel = data['channel']
 
-        if data.startswith(triggerWord):
+        if data.startswith(triggerWord) and channel == slackChannel:
             modded(data[len(triggerWord)+1:len(data)], ts)
             vanilla(data[len(triggerWord)+1:len(data)], ts)
     except KeyError:
