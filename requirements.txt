@@ -3,4 +3,4 @@ paramiko==2.7.1
 DateTime==4.3
 slackclient==2.5.0
 airtable-python-wrapper==0.13.0
-requests==2.20.0
+requests==2.23.0
