@@ -86,9 +86,9 @@ def checksuccess(s, ign, log, ts, version):
 
     # checks to ensure that the player was whitelisted, and send response in slack
     if "to the whitelist" in output:
-        if version == 'vanilla':
-            print(f"{ign} added to vanila server.")
-            sendSlackEmote('heavy_check_mark', ts)
+        print(f"{ign} added to vanila server.")
+        sendSlackEmote('heavy_check_mark', ts)
+        slackResponse('Added to whitelist!', ts)
     elif "already whitelisted" in output:
         print(f'{ign} already whitelisted!')
         sendSlackEmote('disapproval', ts)
