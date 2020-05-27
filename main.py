@@ -88,10 +88,9 @@ def checksuccess(s, ign, log, ts, version):
     if "to the whitelist" in output:
         print(f"{ign} added to vanila server.")
         sendSlackEmote('heavy_check_mark', ts)
-        slackResponse('Added to whitelist!', ts)
     elif "already whitelisted" in output:
         print(f'{ign} already whitelisted!')
-        sendSlackEmote('disapproval', ts)
+        sendSlackEmote('grey_exclamation', ts)
         slackResponse('Player is already whitelisted!', ts)
     elif "does not exist" in output:
         print(f'{ign} does not exist!')
