@@ -54,7 +54,7 @@ def sendSlackEmote(emote, ts):
         token=slackToken,
         channel=slackChannelId,
         name=emote,
-        ts=ts
+        timestamp=ts
     )
 
 
