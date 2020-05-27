@@ -93,6 +93,10 @@ def checksuccess(s, ign, log, ts, version):
         print(f'{ign} already whitelisted!')
         sendSlackEmote('disapproval', ts)
         slackResponse('Player is already whitelisted!', ts)
+    elif "does not exist" in output:
+        print(f'{ign} does not exist!')
+        sendSlackEmote('x', ts)
+        slackResponse('That player doesn\'t exist!', ts)
     else:
         slackResponse(
             f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. The latest line in the file was ```{output}```.', ts)
