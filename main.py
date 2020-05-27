@@ -10,7 +10,7 @@ import time
 import requests
 import os
 import base64
-import io
+
 
 # Write SSH key to file so it can read it
 
@@ -26,10 +26,15 @@ slackChannel = config["slackChannel"]  # Slack channel (plaintext)
 slackChannelId = config["slackChannelId"]  # Slack channel (CCXXXXXXXXX)
 triggerWord = config["triggerWord"]  # trigger word to activate the bot
 
-private_key_file = io.StringIO()
-private_key_file.write(os.environ['sshkey'])
-private_key_file.seek(0)
-key = paramiko.RSAKey.from_private_key(private_key_file)
+# Gets ssh key from environment, decodes base64 to bytestring, spits out utf-8
+keyString = (base64.b64decode(os.environ['sshkey'])).decode('utf-8')
+
+# Warning: shit code ahead because stringIO didn't work
+with open('id_rsa', 'w') as f:  # Writes keyString to file
+    f.write(keyString)
+with open('id_rsa', 'r') as f:  # Reads keyString from file and sets it as the ssh key
+    key = paramiko.RSAKey.from_private_key(f)
+
 
 slack_client = slack.WebClient(token=slackToken)
 
@@ -93,7 +98,7 @@ def checksuccess(s, ign, log, ts, version):
             f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. The latest line in the file was ```{output}```.', ts)
 
 
-@slack.RTMClient.run_on(event="message")
+@ slack.RTMClient.run_on(event="message")
 def message_on(**payload):
     ts = payload['data']['ts']
     try:
@@ -102,7 +107,7 @@ def message_on(**payload):
         channel = payload['data']['channel']
 
         if data.startswith(triggerWord) and channel == slackChannelId:
-            vanilla(data[len(triggerWord)+1:len(data)], ts)
+            vanilla(data[len(triggerWord)+1: len(data)], ts)
     except KeyError as e:
         print(f'ERROR: {e}')
 
