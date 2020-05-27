@@ -36,7 +36,9 @@ with open('id_rsa', 'r') as f:  # Reads keyString from file and sets it as the s
     key = paramiko.RSAKey.from_private_key(f)
 
 
-slack_client = slack.WebClient(token=slackToken)
+slack_client = slack.WebClient(token=slackToken)  # Initializes slack webclient
+
+# function to send threaded responses back to slack
 
 
 def slackResponse(message, ts):
@@ -48,6 +50,8 @@ def slackResponse(message, ts):
         thread_ts=ts
     )
 
+# function to send emotes to slack
+
 
 def sendSlackEmote(emote, ts):
     slack_client.reactions_add(
@@ -58,7 +62,7 @@ def sendSlackEmote(emote, ts):
     )
 
 
-def vanilla(ign, ts):
+def sendCommand(ign, ts):
     # init ssh connection
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -68,13 +72,13 @@ def vanilla(ign, ts):
     s.exec_command(f"tmux send-keys -t server 'whitelist add {ign}' Enter")
 
     # call method to check whether or not the command worked properly
-    checksuccess(s, ign, log2, ts, 'vanilla')
+    checkLog(s, ign, log2, ts, 'vanilla')
 
     # close ssh connection
     s.close()
 
 
-def checksuccess(s, ign, log, ts, version):
+def checkLog(s, ign, log, ts, version):
     # signature
 
     # check for presence in log - was the command successful?
@@ -110,7 +114,7 @@ def message_on(**payload):
         channel = payload['data']['channel']
 
         if data.startswith(triggerWord) and channel == slackChannelId:
-            vanilla(data[len(triggerWord)+1: len(data)], ts)
+            sendCommand(data[len(triggerWord)+1: len(data)], ts)
     except KeyError as e:
         print(f'ERROR: {e}')
 
