@@ -1,6 +1,6 @@
-#Luke Carapezza
-#Jan 04, 2019
-#TODO: Improve so that it will re-run and ensure success after recieving server warning.
+# Luke Carapezza
+# Jan 04, 2019
+# TODO: Improve so that it will re-run and ensure success after recieving server warning.
 
 import slack
 import paramiko
@@ -8,115 +8,106 @@ import json
 from datetime import datetime
 import time
 import requests
+import os
+import base64
+import io
+
+# Write SSH key to file so it can read it
+
+# get info from config
+config = os.environ
+host = config["host"]  # hostname for vanilla server
+username = config["username"]  # username for ssh server
+
+keypass = config["keypass"]  # pass to privkey
+log2 = config["logFile"]  # log file for the second server
+slackToken = config["slackToken"]  # slack OAuth Bot User Token
+slackChannel = config["slackChannel"]  # Slack channel (plaintext)
+slackChannelId = config["slackChannelId"]  # Slack channel (CCXXXXXXXXX)
+triggerWord = config["triggerWord"]  # trigger word to activate the bot
+
+private_key_file = io.StringIO()
+private_key_file.write(os.environ['sshkey'])
+private_key_file.seek(0)
+key = paramiko.RSAKey.from_private_key(private_key_file)
+
+slack_client = slack.WebClient(token=slackToken)
 
 
-#get info from config
-with open ("config.json") as f:
-    config = json.load(f)
-
-    hostModded = config["host"] #hostname for modded server
-    hostVan = config["host2"] #hostname for vanilla server
-    username = config["username"] #username for ssh server
-    key = paramiko.RSAKey.from_private_key_file(config["privkey"]) #generates paramiko key from an openssh privkey
-    keypass = config["keypass"] #pass to privkey
-    log1 = config["log1"] #log file for the first server
-    log2 = config["log2"] #log file for the second server
-    slackToken = config["slackToken"] #slack OAuth Bot User Token
-    slackChannel = config["slackChannel"] #Slack channel (plaintext)
-    slackChannelId = config["slackChannelId"] #Slack channel (CCXXXXXXXXX)
-    triggerWord = config["triggerWord"] #trigger word to activate the bot
-
-with open ("configStickers.json") as f:
-    config = json.load(f)
-
-    api_key1 = config['api_key']
-    base_key = config['base_key']
-    table_name = config['table_name']
-
-slack_client = slack.WebClient(token = slackToken)
 def slackResponse(message, ts):
-    slack_client.chat_postMessage(token = slackToken, as_user=False, channel=slackChannel, text=message, thread_ts=ts)
-    
-def slackEmote(color, ts):
-    if color == 'green':
-        slack_client.reactions_add(token=slackToken, channel=slackChannelId, name="heavy_check_mark", timestamp=ts)
-    elif color == 'white':
-        slack_client.reactions_add(token=slackToken, channel=slackChannelId, name="white_check_mark", timestamp=ts)
-    elif color == 'airtable':
-        slack_client.reactions_add(token = slackToken, channel = slackChannelId, name="airtable", timestamp=ts)
-    else:
-        print (f"Unknown color: color was reported as \"{color}\"")
+    slack_client.chat_postMessage(
+        token=slackToken,
+        as_user=False,
+        channel=slackChannel,
+        text=message,
+        thread_ts=ts
+    )
 
-def modded(ign, ts):
-    #initialize ssh connection to server
-    s = paramiko.SSHClient()
-    s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    s.connect(hostname = hostModded, username = username, pkey = key)
-    
-    #run command to whitelist
-    s.exec_command(f"tmux send-keys -t 0 'whitelist add {ign}' Enter")
 
-    #calls method to check whether or not the command worked
-    checksuccess(s, ign, log1, ts, 'modded')
-    
-    #close ssh connection
-    s.close()
+def sendSlackEmote(emote, ts):
+    slack_client.reactions_add(
+        token=slackToken,
+        channel=slackChannelId,
+        name=emote,
+        ts=ts
+    )
+
 
 def vanilla(ign, ts):
-    #init ssh connection
+    # init ssh connection
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    s.connect(hostname = hostVan, username = username, pkey = key)
-    
-    #run command to whitelist
-    s.exec_command(f"tmux send-keys -t 0 'whitelist add {ign}' Enter")
-    
-    #call method to check whether or not the command worked properly
+    s.connect(hostname=host, username=username, pkey=key)
+
+    # run command to whitelist
+    s.exec_command(f"tmux send-keys -t server 'whitelist add {ign}' Enter")
+
+    # call method to check whether or not the command worked properly
     checksuccess(s, ign, log2, ts, 'vanilla')
 
-    #close ssh connection
+    # close ssh connection
     s.close()
 
-def checksuccess(s, ign, log, ts, version):
-    #signature
-    signature = f"Sign Server {version}."
 
-    #check for presence in log - was the command successful?
+def checksuccess(s, ign, log, ts, version):
+    # signature
+
+    # check for presence in log - was the command successful?
     command = (f"tail -1 {log}")
     (stdin, stdout, stderr) = s.exec_command(command)
 
-    #decodes output of the command
+    # decodes output of the command
     output = stdout.read().decode("utf-8")
-    
-    #checks to ensure that the player was whitelisted, and send response in slack
-    if "to the whitelist" or "is already whitelisted" in output:
-        if version == 'modded':
-            slackEmote('green', ts)
-            print(f"{ign} added to modded server.")
-        elif version == 'vanilla':
+
+    # checks to ensure that the player was whitelisted, and send response in slack
+    if "to the whitelist" in output:
+        if version == 'vanilla':
             print(f"{ign} added to vanila server.")
-            slackEmote('white', ts)
+            sendSlackEmote('heavy_check_mark', ts)
+    elif "already whitelisted" in output:
+        print(f'{ign} already whitelisted!')
+        sendSlackEmote('disapproval', ts)
+        slackResponse('Player is already whitelisted!', ts)
     else:
-        slackResponse(f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. {signature}', ts)
-        slackResponse(f"The latest line in the file was `{output}`.", ts)
+        slackResponse(
+            f'Error! Please check manually. Timestamp {datetime.now().strftime("%H:%M:%S")}. The latest line in the file was ```{output}```.', ts)
 
 
 @slack.RTMClient.run_on(event="message")
 def message_on(**payload):
     ts = payload['data']['ts']
     try:
-        data = payload['data']['text']
+        data = payload['data']['blocks'][0]['elements'][0]['elements'][0]['text']
         web_client = payload['web_client']
-        channel = payload['channel']
+        channel = payload['data']['channel']
 
-        if data.startswith(triggerWord) and channel == slackChannel:
-            modded(data[len(triggerWord)+1:len(data)], ts)
+        if data.startswith(triggerWord) and channel == slackChannelId:
             vanilla(data[len(triggerWord)+1:len(data)], ts)
-    except KeyError:
-        print ("threaded message, ignore.")
+    except KeyError as e:
+        print(f'ERROR: {e}')
 
 
-#verification stuff for slack
+# verification stuff for slack
 slack_token = slackToken
 rtm_client = slack.RTMClient(token=slack_token)
 rtm_client.start()
