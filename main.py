@@ -110,7 +110,7 @@ def checkLog(s, ign, log, ts, version):
 def message_on(**payload):
     ts = payload['data']['ts']
     try:
-        data = payload['data']['blocks'][0]['elements'][0]['elements'][0]['text']
+        data = payload['data']['text']
         web_client = payload['web_client']
         channel = payload['data']['channel']
 
