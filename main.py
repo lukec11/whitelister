@@ -1,6 +1,5 @@
 # Luke Carapezza
 # Jan 04, 2019
-# TODO: Improve so that it will re-run and ensure success after recieving server warning.
 
 import slack
 import paramiko
