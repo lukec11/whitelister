@@ -1,5 +1,5 @@
 slack==0.0.2
-paramiko==2.7.1
+paramiko==2.7.2
 DateTime==4.3
 slackclient==2.7.1
 airtable-python-wrapper==0.13.0
