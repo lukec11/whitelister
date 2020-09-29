@@ -68,7 +68,7 @@ def sendCommand(ign, ts):
     s.connect(hostname=host, username=username, pkey=key)
 
     # run command to whitelist
-    s.exec_command(f"tmux send-keys -t server 'whitelist add {ign}' Enter")
+    s.exec_command(f"tmux send-keys -t 0.0 'whitelist add {ign}' Enter")
     time.sleep(3)  # Waits 3 seconds, because it doesn't go to log immediately
 
     # call method to check whether or not the command worked properly
